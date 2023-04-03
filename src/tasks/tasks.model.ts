@@ -2,10 +2,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { ApiProperty } from '@nestjs/swagger';
-export type TaskEntity = HydratedDocument<TaskModel>;
+
+export type TaskDocument = HydratedDocument<TaskEntity>;
 
 @Schema({ timestamps: true })
-export class TaskModel {
+export class TaskEntity {
   @ApiProperty({
     description: 'The ID of the task',
     example: 'title',
@@ -40,4 +41,4 @@ export class TaskModel {
   completed: boolean;
 }
 
-export const TaskSchema = SchemaFactory.createForClass(TaskModel);
+export const TaskSchema = SchemaFactory.createForClass(TaskEntity);

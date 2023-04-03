@@ -22,6 +22,12 @@ import {
 } from './users.dto';
 import { UsersService } from './users.service';
 import { ApiResponse, ApiTags, OmitType } from '@nestjs/swagger';
+import { ZodValidationPipe } from '../utils/zod.pipline';
+import {
+  CreateUserSchema,
+  GetUserByIdSchema,
+  LoginUserSchema,
+} from './user.schema';
 
 @ApiTags('users')
 @Controller('users')
@@ -31,11 +37,6 @@ export class UsersController {
     private authService: AuthService,
   ) {}
   //==================================================================================================
-
-  @Get()
-  getTest() {
-    return 'test';
-  }
 
   @ApiResponse({
     status: 200,
@@ -91,7 +92,9 @@ export class UsersController {
     },
   })
   @Post('create')
-  createUser(@Body() user: CreateUserDto) {
+  createUser(
+    @Body(new ZodValidationPipe(CreateUserSchema)) user: CreateUserDto,
+  ) {
     return this.userService.createUser(user);
   }
   //==================================================================================================
@@ -134,7 +137,7 @@ export class UsersController {
   })
   @Post('login')
   async login(
-    @Body() credentials: LoginUserDto,
+    @Body(new ZodValidationPipe(LoginUserSchema)) credentials: LoginUserDto,
     @Res({ passthrough: true }) response: Response,
   ) {
     let loggedUser = await this.authService.login(
@@ -146,7 +149,7 @@ export class UsersController {
       httpOnly: true,
     });
 
-    return loggedUser as any;
+    return loggedUser;
   }
   //==================================================================================================
   @ApiResponse({
@@ -179,7 +182,9 @@ export class UsersController {
     },
   })
   @Get(':_id')
-  getUserById(@Param() params: GetUserByIdDto) {
+  getUserById(
+    @Param(new ZodValidationPipe(GetUserByIdSchema)) params: GetUserByIdDto,
+  ) {
     return this.userService.getUserById(params._id);
   }
 }

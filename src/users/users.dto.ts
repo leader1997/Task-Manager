@@ -1,8 +1,8 @@
 import { IsEmail, IsMongoId, IsNotEmpty, MinLength } from 'class-validator';
 import { ObjectId } from 'mongoose';
-import { User } from './user.interface';
+import { User } from './users.interface';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserEntity } from './user.model';
+import { UserEntity } from './users.model';
 import produce from 'immer';
 
 export class CreateUserDto implements User {

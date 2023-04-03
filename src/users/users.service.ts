@@ -9,13 +9,15 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Model, ObjectId } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserEntity } from './user.model';
+import { UserDocument, UserEntity } from './users.model';
+import { MyGateway } from '../gateway/gateway.server';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel('User') private userModel: Model<UserEntity>,
     private jwtService: JwtService,
+    private gateWay: MyGateway,
   ) {}
 
   helloWorld() {
@@ -28,8 +30,16 @@ export class UsersService {
 
     let payload = { ...user, password: hash };
     try {
-      let result = (await this.userModel.create(payload)).toObject();
+      let result: UserDocument = (
+        await this.userModel.create(payload)
+      ).toObject();
       delete result.password;
+      try {
+        this.gateWay.notifyUserCreated(result);
+      } catch {
+        console.log(">> didn't send notification", result);
+      }
+
       return result;
     } catch (error) {
       throw new UnauthorizedException('Duplicate email');

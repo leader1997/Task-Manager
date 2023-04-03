@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { HydratedDocument, ObjectId } from 'mongoose';
 
-export type User = HydratedDocument<UserEntity>;
+export type UserDocument = HydratedDocument<UserEntity>;
 
 @Schema({ timestamps: true })
 export class UserEntity {

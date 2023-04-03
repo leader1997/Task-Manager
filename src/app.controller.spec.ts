@@ -5,30 +5,28 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-
 import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { AppModule } from './app.module';
 import { TasksController } from './tasks/tasks.controller';
 import { UsersController } from './users/users.controller';
-import { CreateUserDto, LoginUserDto } from './users/users.dto';
-import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
+import { CreateUserDto, GetUserByIdDto, LoginUserDto } from './users/users.dto';
 import { HelperService } from './helper/helper.service';
 import { DeleteTaskDto, UpdateTaskDto } from './tasks/tasks.dto';
-import { UserEntity } from './users/user.model';
-import { TaskEntity } from './tasks/task.model';
+import { UserDocument } from './users/users.model';
+import { TaskDocument } from './tasks/tasks.model';
+import { validateRequest } from './utils/validateRequest';
 
 describe('App', () => {
   let usersController: UsersController;
   let taskController: TasksController;
   let helperService: HelperService;
 
-  let user1: UserEntity & { _id: ObjectId };
-  let user2: UserEntity & { _id: ObjectId };
+  let user1: UserDocument;
+  let user2: UserDocument;
 
-  let task1: TaskEntity & { _id: ObjectId };
-  let task2: TaskEntity & { _id: ObjectId };
+  let task1: TaskDocument;
+  let task2: TaskDocument;
 
   let app: TestingModule;
 
@@ -60,39 +58,34 @@ describe('App', () => {
 
   describe('User', () => {
     /*===============================================================================================*/
-    it('Should create 2 users and a task for each one', async () => {
+    it('Should create 2 users', async () => {
       //-----------------------------------------------------------------------------------------------
       //Create User 1
-      const request = plainToInstance(CreateUserDto, {
-        username: 'mossab',
-        email: 'mossab@gmail.com',
+      const request = await validateRequest(CreateUserDto, {
+        username: 'badr',
+        email: 'badr@gmail.com',
         password: 'Mossab1997',
       });
-
-      const errors = await validate(request);
-
-      expect(errors.length).toBe(0);
 
       user1 = await usersController.createUser(request);
 
       expect(user1).toHaveProperty('_id');
       //-----------------------------------------------------------------------------------------------
       //Create User 2
-      const request2 = plainToInstance(CreateUserDto, {
+      const request2 = await validateRequest(CreateUserDto, {
         username: 'mossab2',
         email: 'mossab2@gmail.com',
         password: 'Mossab1997',
       });
 
-      const errors2 = await validate(request2);
-
-      expect(errors2.length).toBe(0);
-
       user2 = await usersController.createUser(request2);
 
       expect(user2).toHaveProperty('_id');
-      //-----------------------------------------------------------------------------------------------
-      //Create Task 1
+    });
+
+    //-----------------------------------------------------------------------------------------------
+    //Create Task 1
+    it('Should create a task for each user ', async () => {
       const task = {
         title: 'Task_1',
         description: 'test description',
@@ -122,17 +115,13 @@ describe('App', () => {
       task2 = await taskController.createTask(task_2, payload_2);
 
       expect(task2).toHaveProperty('_id');
-
-      console.log(
-        ` Task 1: ${task1._id}, Task 1: ${task1._id} , User 1: ${user1._id}, User 2: ${user2._id}`,
-      );
     });
     /*===============================================================================================*/
 
     it('Should detect Duplicate Email during user registration', async () => {
       let request = {
-        username: 'mossab',
-        email: 'mossab@gmail.com',
+        username: 'badr',
+        email: 'badr@gmail.com',
         password: 'Mossab1997',
       } as CreateUserDto;
 
@@ -155,13 +144,14 @@ describe('App', () => {
     });
 
     it('Should not pass the registration cause of Missing required fields', async () => {
-      let dto = plainToInstance(CreateUserDto, {
-        email: 'eemail3@mail.com',
-        password: 'Mossab1997',
-      });
-
-      const errors = await validate(dto);
-      expect(errors.length).not.toBe(0);
+      let dto = (await validateRequest(
+        CreateUserDto,
+        {
+          email: 'eemail3@mail.com',
+          password: 'Mossab1997',
+        },
+        1,
+      )) as CreateUserDto;
 
       await expect(usersController.createUser(dto)).rejects.toThrow(
         UnauthorizedException,
@@ -169,24 +159,20 @@ describe('App', () => {
     });
 
     it('Should detect if a user exists by Id', async () => {
-      const request = {
-        _id: new ObjectId('64209351cc72086b0fa51263'),
-      };
+      const request = (await validateRequest(GetUserByIdDto, {
+        _id: new ObjectId('6424dadd1753b6c96fd57c01'),
+      })) as GetUserByIdDto;
 
-      await expect(usersController.getUserById(request as any)).rejects.toThrow(
+      await expect(usersController.getUserById(request)).rejects.toThrow(
         NotFoundException,
       );
     });
 
     it('Should not connect using incorrect Login/Password', async () => {
-      const request = plainToInstance(LoginUserDto, {
-        email: 'mossab@gmail.com',
+      const request = (await validateRequest(LoginUserDto, {
+        email: 'badr@gmail.com',
         password: 'Mossab197',
-      });
-
-      const errors = await validate(request);
-
-      expect(errors.length).toBe(0);
+      })) as LoginUserDto;
 
       await expect(
         usersController.login(request, {} as Response),
@@ -217,13 +203,10 @@ describe('App', () => {
     });
 
     it('should try to Update a not found task', async () => {
-      const request = plainToInstance(UpdateTaskDto, {
+      const request = await validateRequest(UpdateTaskDto, {
         title: 'test',
         description: 'test description',
       });
-
-      const errors = await validate(request);
-      expect(errors.length).toBe(0);
 
       const req = {
         user: {
@@ -245,14 +228,10 @@ describe('App', () => {
     });
 
     it('should try to Update a task not owned by user', async () => {
-      const request = plainToInstance(UpdateTaskDto, {
+      const request = await validateRequest(UpdateTaskDto, {
         title: 'test',
         description: 'test description',
       });
-
-      const errors = await validate(request);
-
-      expect(errors.length).toBe(0);
 
       const req = {
         user: {
@@ -274,14 +253,10 @@ describe('App', () => {
     });
 
     it('Should try to Update a non-existent task', async () => {
-      const request = plainToInstance(UpdateTaskDto, {
+      const request = await validateRequest(UpdateTaskDto, {
         title: 'test',
         description: 'test description',
       });
-
-      const errors = await validate(request);
-
-      expect(errors.length).toBe(0);
 
       const req = {
         user: {

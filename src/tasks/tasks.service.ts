@@ -7,7 +7,7 @@ import {
 import { CreateTaskDto, UpdateTaskDto } from './tasks.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
-import { TaskEntity } from './task.model';
+import { TaskEntity } from './tasks.model';
 import { GetUserByIdDto } from '../users/users.dto';
 import { UsersService } from '../users/users.service';
 

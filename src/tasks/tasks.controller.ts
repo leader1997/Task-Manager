@@ -21,6 +21,12 @@ import {
 import { TasksService } from './tasks.service';
 import { ApiBadRequestResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthentificationGuard } from '../auth/auth.guard';
+import { ZodValidationPipe } from '../utils/zod.pipline';
+import {
+  CreateTaskSchema,
+  DeleteTaskSchema,
+  UpdateTaskSchema,
+} from './tasks.schema';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -46,7 +52,7 @@ export class TasksController {
   @Get()
   @UseGuards(AuthentificationGuard)
   getUserTasks(@Req() request: Request) {
-    return this.taskService.getUserTasks((request.user as any)._id);
+    return this.taskService.getUserTasks(request.user['_id']);
   }
 
   @ApiResponse({
@@ -80,8 +86,11 @@ export class TasksController {
   })
   @Post()
   @UseGuards(AuthentificationGuard)
-  createTask(@Body() task: CreateTaskDto, @Req() request: Request) {
-    return this.taskService.createTask(task, (request.user as any)._id);
+  createTask(
+    @Body(new ZodValidationPipe(CreateTaskSchema)) task: CreateTaskDto,
+    @Req() request: Request,
+  ) {
+    return this.taskService.createTask(task, request.user['_id']);
   }
 
   @ApiResponse({
@@ -115,14 +124,10 @@ export class TasksController {
   @UseGuards(AuthentificationGuard)
   updateTask(
     @Param('_id') param: ObjectId,
-    @Body() updateTask: UpdateTaskDto,
+    @Body(new ZodValidationPipe(UpdateTaskSchema)) updateTask: UpdateTaskDto,
     @Req() request: Request,
   ) {
-    return this.taskService.updateTask(
-      param,
-      (request.user as any)._id,
-      updateTask,
-    );
+    return this.taskService.updateTask(param, request.user['_id'], updateTask);
   }
 
   @ApiResponse({
@@ -143,7 +148,10 @@ export class TasksController {
   })
   @Delete(':_id')
   @UseGuards(AuthentificationGuard)
-  deleteTask(@Param() param: DeleteTaskDto, @Req() request: Request) {
-    return this.taskService.deleteTask(param._id, (request.user as any)._id);
+  deleteTask(
+    @Param(new ZodValidationPipe(DeleteTaskSchema)) param: DeleteTaskDto,
+    @Req() request: Request,
+  ) {
+    return this.taskService.deleteTask(param._id, request.user['_id']);
   }
 }

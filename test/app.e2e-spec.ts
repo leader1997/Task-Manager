@@ -9,11 +9,9 @@ import { AppModule } from '../src/app.module';
 import * as request from 'supertest';
 import { UsersService } from '../src/users/users.service';
 import { CreateUserDto, LoginUserDto } from '../src/users/users.dto';
-import { ObjectId } from 'mongodb';
-import { UserEntity } from '../src/users/user.model';
-import { TaskEntity } from '../src/tasks/task.model';
-import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
+import { UserDocument } from '../src/users/users.model';
+import { TaskDocument } from '../src/tasks/tasks.model';
+import { validateRequest } from '../src/utils/validateRequest';
 import { UsersController } from '../src/users/users.controller';
 import { Request } from 'express';
 import { TasksController } from '../src/tasks/tasks.controller';
@@ -28,11 +26,11 @@ describe('AppController (e2e)', () => {
   let helperService: HelperService;
   let jwtService: JwtService;
 
-  let user_1: UserEntity & { _id: ObjectId };
-  let user_2: UserEntity & { _id: ObjectId };
+  let user_1: UserDocument;
+  let user_2: UserDocument;
 
-  let task_1: TaskEntity & { _id: ObjectId };
-  let task_2: TaskEntity & { _id: ObjectId };
+  let task_1: TaskDocument;
+  let task_2: TaskDocument;
 
   let access_token_1: string;
   let access_token_2: string;
@@ -61,39 +59,34 @@ describe('AppController (e2e)', () => {
 
   describe('User', () => {
     /*==================================================================================================*/
-    it('Should create 2 users and a task for each one + init access token', async () => {
+    it('Should create 2 users', async () => {
       //-----------------------------------------------------------------------------------------------
       //Create User 1
-      const request = plainToInstance(CreateUserDto, {
+      const request = await validateRequest(CreateUserDto, {
         username: 'mossab',
         email: 'mossab@gmail.com',
         password: 'Mossab1997',
       });
-
-      const errors = await validate(request);
-
-      expect(errors.length).toBe(0);
 
       user_1 = await usersController.createUser(request);
 
       expect(user_1).toHaveProperty('_id');
       //-----------------------------------------------------------------------------------------------
       //Create User 2
-      const request2 = plainToInstance(CreateUserDto, {
+      const request2 = await validateRequest(CreateUserDto, {
         username: 'mossab2',
         email: 'mossab2@gmail.com',
         password: 'Mossab1997',
       });
-
-      const errors2 = await validate(request2);
-
-      expect(errors2.length).toBe(0);
 
       user_2 = await usersController.createUser(request2);
 
       expect(user_2).toHaveProperty('_id');
       //-----------------------------------------------------------------------------------------------
       //Create Task 1
+    });
+
+    it('Should create a task for each user', async () => {
       const task = {
         title: 'Task_1',
         description: 'test description',
@@ -123,7 +116,9 @@ describe('AppController (e2e)', () => {
       task_2 = await taskController.createTask(task2, payload_2);
 
       expect(task_2).toHaveProperty('_id');
+    });
 
+    it('Should init access token', async () => {
       access_token_1 = await jwtService.sign(
         { _id: user_1._id },
         { secret: process.env.SECRET_TOKEN },
@@ -133,14 +128,6 @@ describe('AppController (e2e)', () => {
         { _id: user_2._id },
         { secret: process.env.SECRET_TOKEN },
       );
-
-      // console.log(
-      //   ` Task 1: ${task_1._id}, Task 1: ${task_1._id} , User 1: ${user_1._id}, User 2: ${user_2._id}`,
-      // );
-
-      // console.log(
-      //   `Access Token 1: ${access_token_1}, Access Token 2: ${access_token_2}`,
-      // );
     });
     /*==================================================================================================*/
     it('/users/create (POST) - Should detect Duplicate Email during user registration', async () => {

@@ -23,7 +23,7 @@ export class AuthService {
 
       const { password, ...result } = user;
 
-      return { access_token: jwt, ...result } as any;
+      return { access_token: jwt, ...result };
     } else {
       throw new BadRequestException('email or password not correct!!');
     }

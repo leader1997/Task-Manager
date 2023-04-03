@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
-import { TaskEntity } from '../tasks/task.model';
-import { UserEntity } from '../users/user.model';
+import { TaskEntity } from '../tasks/tasks.model';
+import { UserEntity } from '../users/users.model';
 
 @Injectable()
 export class HelperService {
@@ -13,6 +14,14 @@ export class HelperService {
 
   async getUserByEmail(email: string) {
     const doc = await this.userModel.findOne({ email: email }).lean();
+    if (!doc) {
+      throw new NotFoundException('user not found');
+    }
+    return doc;
+  }
+
+  async getUserById(_id: ObjectId) {
+    const doc = await this.userModel.findById(_id).lean();
     if (!doc) {
       throw new NotFoundException('user not found');
     }

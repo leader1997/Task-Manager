@@ -10,8 +10,8 @@ import {
 } from 'class-validator';
 
 import { ObjectId } from 'mongoose';
-import { Task } from './task.interface';
-import { TaskModel } from './task.model';
+import { Task } from './tasks.interface';
+import { TaskEntity } from './tasks.model';
 
 export class CreateTaskDto implements Pick<Task, 'title' | 'description'> {
   @ApiProperty({
@@ -57,7 +57,7 @@ export class DeleteTaskDto {
 }
 
 //=========================
-export class CreateTaskResponseDto extends TaskModel {
+export class CreateTaskResponseDto extends TaskEntity {
   @ApiProperty({
     description: 'The DATE OF CREATION of the task',
     example: new Date(),
