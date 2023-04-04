@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as csurf from 'csurf';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,7 +15,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  app.use(helmet());
   app.use(cookieParser());
+  app.use(csurf({ cookie: true }));
   app.enableCors({ origin: 'http://localhost:3000', credentials: true });
 
   const config = new DocumentBuilder()

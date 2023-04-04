@@ -16,10 +16,10 @@ export class AuthentificationGuard implements CanActivate {
     try {
       let request = context.switchToHttp().getRequest() as Request;
 
-      const token = request.headers['access-token'];
+              const token = request.headers['access-token'];
 
       if (token && typeof token === 'string') {
-        let user = await this.userService.whoami(token);
+                let user = await this.userService.whoami(token);
         request.user = user;
         if (user) return true;
 

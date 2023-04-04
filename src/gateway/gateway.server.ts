@@ -5,11 +5,23 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { WebSocketAuthGuard } from './ws.auth.guard';
+import { WebSocketAuthGuard, WsThrottlerGuard } from './ws.auth.guard';
 import { UserDocument } from '../users/users.model';
+import {
+  ThrottlerGuard,
+  ThrottlerModuleOptions,
+  ThrottlerStorageService,
+} from '@nestjs/throttler';
+
+const options: ThrottlerModuleOptions = {
+  ttl: 60,
+  limit: 10,
+};
 
 @WebSocketGateway()
 export class MyGateway {
+  constructor(private readonly throttlerService: ThrottlerStorageService) {}
+
   @WebSocketServer() server: Server;
 
   notifyUserCreated(user: UserDocument) {

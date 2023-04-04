@@ -7,6 +7,8 @@ import { TasksModule } from './tasks/tasks.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { env } from './env';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { Auth0Module } from './auth0/auth0.module';
 
 console.log(env.MONGO_URL, env.SECRET_TOKEN, env.PORT, env.NODE_ENV);
 
@@ -17,6 +19,11 @@ console.log(env.MONGO_URL, env.SECRET_TOKEN, env.PORT, env.NODE_ENV);
     }),
     UsersModule,
     TasksModule,
+    Auth0Module,
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 1,
+    }),
   ],
   controllers: [AppController],
   exports: [AppModule],
