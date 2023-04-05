@@ -12,7 +12,7 @@ jobs:
   build_and_run:
     runs-on: ubuntu-latest
     env:
-      SECRET_TOKEN: 239482
+      SECRET_TOKEN: 239482${{ secrets.SECRET_TOKEN }}
       MONGO_URL: mongodb://127.0.0.1:27017/TaskManagerDev
       PORT: 3000
     steps:
@@ -41,5 +41,5 @@ jobs:
         shell: bash
 
       - name: 'Run application'
-        run: pnpm run start:dev
+        run: pnpm run start:prod
         shell: bash

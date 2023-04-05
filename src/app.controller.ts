@@ -19,7 +19,7 @@ export class AppController {
     return 'Server is running';
   }
 
-  //@UseGuards(Auth0Guard)
+  //@UseGuards   (Auth0Guard)
   @SkipThrottle()
   @UseGuards(AuthGuard('jwt'))
   @Get('test')
