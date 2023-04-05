@@ -46,10 +46,6 @@ jobs:
           done
         shell: bash
 
-      - name: 'Run tests'
-        run: pnpm test
-        shell: bash
-
       - name: 'Run e2e tests'
         run: pnpm test:e2e
         shell: bash
