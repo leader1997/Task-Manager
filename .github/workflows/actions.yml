@@ -41,5 +41,5 @@ jobs:
         shell: bash
 
       - name: 'Run application'
-        run: npm run start:dev
+        run: pnpm run start:dev
         shell: bash
