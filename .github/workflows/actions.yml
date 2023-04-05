@@ -40,7 +40,12 @@ jobs:
         shell: bash
         
       - name: 'Wait for MongoDB to initialize'
-        run: sleep 15
+        run: |
+          for i in {1..30}; do
+            nc -z localhost 27017 && echo "MongoDB is up" && break
+            echo "Waiting for MongoDB to initialize..."
+            sleep 5
+          done
         shell: bash
         
       - name: 'Run tests'
