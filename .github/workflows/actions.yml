@@ -23,7 +23,7 @@ jobs:
           node-version: '18.15.0'
 
       - name: Install pnpm
-        run: npm install -g pnpm
+        run: npm install pnpm@7 -g
         shell: bash
 
       - name: 'Install dependencies'
