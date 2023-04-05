@@ -21,7 +21,7 @@ jobs:
 
     env:
       SECRET_TOKEN: 239482
-      MONGO_URL: mongodb:/mongo:27017/TaskManagerDev
+      MONGO_URL: mongodb:/0.0.0.0:27017/TaskManagerDev
       PORT: 3000
 
     steps:
