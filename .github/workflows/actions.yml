@@ -1,6 +1,4 @@
 name: 'Task Manager App'
-description: 'new manager app to manage your tasks'
-author: 'Mossab'
 
 on:
   push:
