@@ -13,15 +13,13 @@ jobs:
     services:
       mongodb:
         image: mongo:latest
-        env:
-          MONGO_INITDB_DATABASE: TaskManagerDev
 
         ports:
           - 27017:27017
 
     env:
       SECRET_TOKEN: 239482
-      MONGO_URL: mongodb:/localhost:27017/TaskManagerDev
+      MONGO_URL: mongodb://localhost:27017/TaskManagerDev
       PORT: 3000
 
     steps:
@@ -40,7 +38,11 @@ jobs:
       - name: 'Install dependencies'
         run: pnpm install
         shell: bash
-
+        
+      - name: 'Wait for MongoDB to initialize'
+        run: sleep 15
+        shell: bash
+        
       - name: 'Run tests'
         run: pnpm test
         shell: bash
