@@ -1,0 +1,45 @@
+name: 'Task Manager App'
+description: 'new manager app to manage your tasks'
+author: 'Mossab'
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build_and_run:
+    runs-on: ubuntu-latest
+    env:
+      SECRET_TOKEN: 239482
+      MONGO_URL: mongodb://127.0.0.1:27017/TaskManagerDev
+      PORT: 3000
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.0.1
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+        shell: bash
+
+      - name: 'Install dependencies'
+        run: pnpm install
+        shell: bash
+
+      - name: 'Run tests'
+        run: pnpm test
+        shell: bash
+
+      - name: 'Run e2e tests'
+        run: pnpm test:e2e
+        shell: bash
+
+      - name: 'Run application'
+        run: npm run start:dev
+        shell: bash
